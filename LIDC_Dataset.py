@@ -99,6 +99,7 @@ class LIDC_Dataset(Dataset):
             img = img.repeat(3,1,1)
             
         elif self.depth > 1:
+            # Then I extract stack of slices around the central slice.
             k=self.depth//2
             if view == self.views[0]:
                 img = img[:, :, slice_-k:slice_+k+1]

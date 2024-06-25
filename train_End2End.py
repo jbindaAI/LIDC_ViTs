@@ -12,31 +12,31 @@ from LIDC_DataModule import DataModule
 
 
 ## HYPERPARAMETERS:
-MODEL_NR:int = 12
-WANDB_PROJECT:str = "3DViT_E2E"
-MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16", "3Dvit_8", "3Dvit_16"]="3Dvit_16"
-DEPTH:int = 15
-BOOTSTRAP_METHOD:Literal["centering", "inflation", None] = "inflation"
-EPOCHS:int = 80
-BATCH_SIZE:int = 16
-MAX_LR:float = 3e-5
+MODEL_NR:int = 39
+WANDB_PROJECT:str = "DINO_E2E"
+MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16", "3Dvit_8", "3Dvit_16"]="dino_vits8"
+DEPTH:int = 1 # 1 if only slices, more than 1 if training on volumes. 
+BOOTSTRAP_METHOD:Literal["centering", "inflation", None] = None
+EPOCHS:int = 50
+BATCH_SIZE:int = 8
+MAX_LR:float = 5e-5
 DIV_FACTOR:int = 100 # Base LR is computed as MAX_LR/DIV_FACTOR.
 N_CYCLES:int = 4
 TRAINABLE_LAYERS:Union[int, Literal["all"]] = "all"
 BCKB_DROPOUT:float = 0.12
-LOCAL:bool = True
-SAVE_TOP_CKPTS:int = 0
+LOCAL:bool = False
+SAVE_TOP_CKPTS:int = 3
 
 
 if LOCAL:
     datapath="/home/jbinda/INFORM/LIDC_ViTs/dataset/"
     checkpoints_path="/home/jbinda/INFORM/LIDC_ViTs/ckpt/End2End/"
 else:
-    datapath=""
-    checkpoints_path=""
+    datapath="/home/dzban112/LIDC_ViTs/dataset/"
+    checkpoints_path="/home/dzban112/LIDC_ViTs/ckpt/End2End/"
 
 
-for fold in range(1,2): # Iteration over folds
+for fold in range(1,6): # Iteration over folds
     # Getting value of training steps:
     with open(datapath+f"splitted_sets/train_fold_{fold}.pkl", "rb") as f:
         n_train_examples = len(pickle.load(f))
