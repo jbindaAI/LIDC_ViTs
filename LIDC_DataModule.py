@@ -26,7 +26,7 @@ class DataModule(pl.LightningDataModule):
     
     def setup(self, stage:str=None):
         # when model is trained on slices
-        with open(self.datapath+"splitted_sets"+"/"+"fitted_factors_2D.pkl", 'rb') as f:
+        with open(self.datapath+"splitted_sets"+"/"+"fitted_factors.pkl", 'rb') as f:
             norm_factors = pickle.load(f)
         mean, std, scaler = norm_factors[f"fold_{self.fold}"]
                      

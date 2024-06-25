@@ -73,7 +73,7 @@ class End2End_Model(pl.LightningModule):
                 qkv_bias=True,
                 norm_layer=partial(nn.LayerNorm, eps=1e-6),
                 model_type="3Dvit_16",
-                bootstrap_method="centering")
+                bootstrap_method=self.bootstrap_method)
             self.backbone.init_weights()
             self.mlp_head=nn.Sequential(nn.Linear(self.backbone.embed_dim, 1))
         else:

@@ -12,16 +12,16 @@ from LIDC_DataModule import DataModule
 
 
 ## HYPERPARAMETERS:
-MODEL_NR:int = 1
+MODEL_NR:int = 12
 WANDB_PROJECT:str = "3DViT_E2E"
 MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16", "3Dvit_8", "3Dvit_16"]="3Dvit_16"
-DEPTH:int = 5
+DEPTH:int = 15
 BOOTSTRAP_METHOD:Literal["centering", "inflation", None] = "inflation"
-EPOCHS:int = 100
+EPOCHS:int = 80
 BATCH_SIZE:int = 16
-MAX_LR:float = 5e-5
-DIV_FACTOR:int = 10000 # Base LR is computed as MAX_LR/DIV_FACTOR.
-N_CYCLES:int = 2
+MAX_LR:float = 3e-5
+DIV_FACTOR:int = 100 # Base LR is computed as MAX_LR/DIV_FACTOR.
+N_CYCLES:int = 4
 TRAINABLE_LAYERS:Union[int, Literal["all"]] = "all"
 BCKB_DROPOUT:float = 0.12
 LOCAL:bool = True

@@ -15,7 +15,7 @@ from LIDC_DataModule import DataModule
 MODEL_NR:int = 1
 WANDB_PROJECT:str = "DINO_biom"
 MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16", "3Dvit_8", "3Dvit_16"]="dino_vitb16"
-DEPTH:int = 5
+DEPTH:int = 9
 BOOTSTRAP_METHOD:Literal["centering", "inflation", None] = "inflation"
 EPOCHS:int = 70
 BATCH_SIZE:int = 16
