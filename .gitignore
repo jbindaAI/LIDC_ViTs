@@ -4,4 +4,5 @@ ckpt/
 .ipynb_checkpoints/
 dataset/
 pretrained/
+wsad.slurm
 

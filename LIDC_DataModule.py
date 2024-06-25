@@ -26,21 +26,27 @@ class DataModule(pl.LightningDataModule):
     
     def setup(self, stage:str=None):
         # when model is trained on slices
-        with open(self.datapath+"splitted_sets"+"/"+"fitted_factors_2D.pkl", 'rb') as f:
+        with open(self.datapath+"splitted_sets"+"/"+"fitted_factors.pkl", 'rb') as f:
             norm_factors = pickle.load(f)
         mean, std, scaler = norm_factors[f"fold_{self.fold}"]
+        if self.depth == 1:
+            mean = [mean for _ in range(3)]
+            std = [std for _ in range(3)]
+        else:
+            mean = [mean for _ in range(self.depth)]
+            std = [std for _ in range(self.depth)]
                      
         train_transform = v2.Compose(
             [
                 v2.Resize((224, 224)),
                 MyRotation([0, 90, 180, 270]),
-                v2.Normalize(mean=[mean[0] for _ in range(self.depth)], std=[std[0] for _ in range(self.depth)])
+                v2.Normalize(mean=mean, std=std)
             ])
             
         val_transform = v2.Compose(
             [
                 v2.Resize((224, 224)),
-                v2.Normalize(mean=[mean[0] for _ in range(self.depth)], std=[std[0] for _ in range(self.depth)])
+                v2.Normalize(mean=mean, std=std)
             ])
             
         self.train_ds = LIDC_Dataset(
