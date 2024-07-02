@@ -12,17 +12,17 @@ from LIDC_DataModule import DataModule
 
 
 ## HYPERPARAMETERS:
-MODEL_NR:int = 2
+MODEL_NR:int = 5
 WANDB_PROJECT:str = "DINO_biom"
 MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16"]="dino_vitb16"
 EPOCHS:int = 50
-BATCH_SIZE:int = 16
+BATCH_SIZE:int = 20
 MAX_LR:float = 1e-4
 DIV_FACTOR:int = 1000 # Base LR is computed as MAX_LR/DIV_FACTOR.
 N_CYCLES:int = 2
 TRAINABLE_LAYERS:Union[int, Literal["all"]] = "all"
 BCKB_DROPOUT:float = 0.12
-LOCAL:bool = True
+LOCAL:bool = False
 SAVE_TOP_CKPTS:int = 0
 
 
@@ -30,8 +30,8 @@ if LOCAL:
     datapath="/home/jbinda/INFORM/LIDC_ViTs/dataset/"
     checkpoints_path="/home/jbinda/INFORM/LIDC_ViTs/ckpt/Biomarkers/"
 else:
-    datapath=""
-    checkpoints_path=""
+    datapath="/home/dzban112/LIDC_ViTs/dataset/"
+    checkpoints_path="/home/dzban112/LIDC_ViTs/ckpt/Biomarkers/"
 
 
 for fold in range(1,2): # Iteration over folds
