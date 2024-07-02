@@ -16,7 +16,9 @@ def set_encoder_dropout_p(module, dropout_p):
 
 class End2End_Model(pl.LightningModule):
     def __init__(self,
-                 model_type:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16", "3Dvit_8", "3Dvit_16"]="dino_vits8",
+                 model_type:Literal["dino_vits8", "dino_vitb8", 
+                 "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16",
+                 "dinov2_vits14_reg", "dinov2_vitb14_reg", "3Dvit_16"]="dino_vits8",
                  trainable_layers:Union[int, Literal["all"]]="all", 
                  backbone_dropout:float=0.0,
                  max_lr:float=5e-6,
@@ -44,9 +46,8 @@ class End2End_Model(pl.LightningModule):
             self.backbone = torch.hub.load("facebookresearch/dino:main", model_type)
             self.mlp_head=nn.Sequential(nn.Linear(self.backbone.embed_dim, 1))
 
-        elif model_type in ['dinov2_vits14', 'dinov2_vitb14', 'dinov2_vitl14']:
-            self.backbone = troch.hub.load('facebookresearch/dinov2', model_type)
-            ...
+        elif model_type in ['dinov2_vits14_reg', 'dinov2_vitb14_reg']:
+            self.backbone = torch.hub.load('facebookresearch/dinov2', model_type)
             self.mlp_head=nn.Sequential(nn.Linear(self.backbone.embed_dim, 1))
             
         elif model_type == "vit_b_16":
@@ -59,14 +60,12 @@ class End2End_Model(pl.LightningModule):
             self.backbone.heads = nn.Identity(self.backbone.hidden_dim)
             self.mlp_head=nn.Sequential(nn.Linear(self.backbone.hidden_dim, 1))
 
-        elif model_type == "3Dvit_8":
-            ...
         elif model_type == "3Dvit_16":
             self.backbone = VisionTransformer3D(
                 img_size=(self.depth,224,224),
-                patch_size=(self.depth, 16, 16),
+                patch_size=(self.depth, 16, 16), # there self.depth refers to image depth
                 embed_dim=768,
-                depth=12,
+                depth=12, # there depth refers to number of encoders. 
                 in_chans=1,
                 num_heads=12,
                 mlp_ratio=4.0, 
@@ -77,7 +76,7 @@ class End2End_Model(pl.LightningModule):
             self.backbone.init_weights()
             self.mlp_head=nn.Sequential(nn.Linear(self.backbone.embed_dim, 1))
         else:
-            raise Exception("Provided model is not handled.")
+            raise Exception("Provided model name is not recognized.")
         
         # changing backbone dropout values:
         if backbone_dropout > 0.0:       

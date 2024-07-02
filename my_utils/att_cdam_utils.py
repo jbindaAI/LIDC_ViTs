@@ -39,7 +39,7 @@ def get_cmap(heatmap):
 ## Obtaining attention map
 def get_attention_map(model, sample_img, last_selfattn, model_bckb, head=None, return_raw=False):
     """This returns the attentions when CLS token is used as query in the last attention layer, averaged over all attention heads"""
-    if model_bckb in ["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16"]:
+    if model_bckb in ["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "dinov2_vits14_reg", "dinov2_vitb14_reg"]:
         attentions = model.backbone.get_last_selfattention(sample_img)
     elif model_bckb in ["vit_b_16", "vit_l_16"]:
         attentions = last_selfattn["last_selfattn"]

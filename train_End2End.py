@@ -12,16 +12,17 @@ from LIDC_DataModule import DataModule
 
 
 ## HYPERPARAMETERS:
-MODEL_NR:int = 19
-WANDB_PROJECT:str = "3DViT_E2E"
-MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16", "3Dvit_8", "3Dvit_16"]="3Dvit_16"
-DEPTH:int = 5 # 1 if only slices, more than 1 if training on volumes. 
+MODEL_NR:int = 4
+WANDB_PROJECT:str = "DINOv2_E2E"
+MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", 
+"vit_b_16", "vit_l_16", "dinov2_vits14_reg", "3Dvit_16"]="dinov2_vits14_reg"
+DEPTH:int = 1 # 1 if only slices, more than 1 if training on volumes. 
 BOOTSTRAP_METHOD:Literal["centering", "inflation", None] = None
-EPOCHS:int = 80
-BATCH_SIZE:int = 16
+EPOCHS:int = 35
+BATCH_SIZE:int = 8
 MAX_LR:float = 3e-5
-DIV_FACTOR:int = 100 # Base LR is computed as MAX_LR/DIV_FACTOR.
-N_CYCLES:int = 4
+DIV_FACTOR:int = 1000 # Base LR is computed as MAX_LR/DIV_FACTOR.
+N_CYCLES:int = 2
 TRAINABLE_LAYERS:Union[int, Literal["all"]] = "all"
 BCKB_DROPOUT:float = 0.12
 LOCAL:bool = False

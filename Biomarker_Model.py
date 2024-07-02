@@ -16,71 +16,42 @@ def set_encoder_dropout_p(module, dropout_p):
 
 class Biomarker_Model(pl.LightningModule):
     def __init__(self,
-                 model_type:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16", "3Dvit_8", "3Dvit_16"]="dino_vits8",
+                 model_type:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16"]="dino_vits8",
                  trainable_layers:Union[int, Literal["all"]]="all", 
                  backbone_dropout:float=0.0,
                  max_lr:float=5e-6,
                  steps_per_epoch:int=30,
                  epochs:int=45,
                  div_factor:int=100,
-                 n_cycles:int=6,
-                 bootstrap_method:Optional[str]=None,
-                 depth:int=5
+                 n_cycles:int=6
                 ):
         
         super().__init__()
         self.epochs=epochs
-        self.backbone_dropout = backbone_dropout
-        self.max_lr = max_lr
-        self.div_factor = div_factor
-        self.steps_per_epoch = steps_per_epoch
-        self.n_cycles = n_cycles
-        self.model_type = model_type
-        self.bootstrap_method = bootstrap_method
-        self.depth = depth
+        self.backbone_dropout=backbone_dropout
+        self.max_lr=max_lr
+        self.div_factor=div_factor
+        self.steps_per_epoch=steps_per_epoch
+        self.n_cycles=n_cycles
+        self.model_type=model_type
+        self.bootstrap_method=bootstrap_method
+        self.depth=depth
         self.save_hyperparameters()
 
         if model_type in ["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16"]:
             self.backbone = torch.hub.load("facebookresearch/dino:main", model_type)
             hidden_size=self.backbone.embed_dim
-            self.mlp_head=nn.Sequential(nn.Linear(self.backbone.embed_dim, 1))
-
         elif model_type in ['dinov2_vits14', 'dinov2_vitb14', 'dinov2_vitl14']:
             self.backbone=torch.hub.load('facebookresearch/dinov2', model_type)
             hidden_size=self.backbone.embed_dim
-            ...
-            self.mlp_head=nn.Sequential(nn.Linear(self.backbone.embed_dim, 1))
-            
         elif model_type=="vit_b_16":
             self.backbone=torchvision.models.vit_b_16(weights='IMAGENET1K_V1')
             self.backbone.heads=nn.Identity(self.backbone.hidden_dim)
             hidden_size=self.backbone.hidden_dim
-            self.mlp_head=nn.Sequential(nn.Linear(self.backbone.hidden_dim, 1))
-
         elif model_type=="vit_l_16":
             self.backbone=torchvision.models.vit_l_16(weights='IMAGENET1K_V1')
             self.backbone.heads=nn.Identity(self.backbone.hidden_dim)
-            hidden_size=self.backbone.hidden_dim
-            self.mlp_head=nn.Sequential(nn.Linear(self.backbone.hidden_dim, 1))
-
-        elif model_type=="3Dvit_8":
-            ...
-        elif model_type=="3Dvit_16":
-            self.backbone=VisionTransformer3D(
-                img_size=(self.depth,224,224),
-                patch_size=(self.depth, 16, 16),
-                embed_dim=768,
-                depth=12,
-                in_chans=1,
-                num_heads=12,
-                mlp_ratio=4.0, 
-                qkv_bias=True,
-                norm_layer=partial(nn.LayerNorm, eps=1e-6),
-                model_type="3Dvit_16",
-                bootstrap_method="centering")
-            self.backbone.init_weights()
-            hidden_size=self.backbone.embed_dim
-            
+            hidden_size=self.backbone.hidden_dim 
         else:
             raise Exception("Provided model is not handled.")
 

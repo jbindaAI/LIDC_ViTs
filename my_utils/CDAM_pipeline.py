@@ -21,7 +21,8 @@ def cdam_pipeline(NODULE: str,
                    SLICE: int,
                    NODULE_VIEW: Literal["axial", "coronal", "sagittal"],
                    TASK: Literal["Regression", "Classification"],
-                   MODEL_BCKB: Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16"],
+                   MODEL_BCKB: Literal["dino_vits8", "dino_vitb8", 
+                  "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16", "dinov2_vits14_reg", "dinov2_vitb14_reg"],
                    CKPT_VERSION: int,
                    FOLD: int=1)->Tuple[torch.Tensor, torch.Tensor, Dict[str, torch.Tensor]]:
     """
@@ -35,7 +36,10 @@ def cdam_pipeline(NODULE: str,
                    "dino_vitb8":8,
                    "dino_vits16":16,
                    "dino_vitb16":16,
-                   "vit_b_16":16}
+                   "vit_b_16":16,
+                   "dinov2_vits14_reg":14,
+                   "dinov2_vitb14_reg":14
+                  }
     PATCH_SIZE = patch_sizes[MODEL_BCKB]
 
     # Retrieving model numer:
@@ -43,7 +47,10 @@ def cdam_pipeline(NODULE: str,
                    "dino_vitb8":38,
                    "dino_vits16":32,
                    "dino_vitb16":35,
-                   "vit_b_16":9}
+                   "vit_b_16":9,
+                    "dinov2_vits14_reg":4,
+                    "dinov2_vitb14_reg":1
+                   }
     MODEL_NR = model_numers[MODEL_BCKB]
     
     # Loading model and registering hooks:
@@ -111,7 +118,7 @@ def cdam_pipeline(NODULE: str,
     #### ii) gradients wrt the normalized inputs to the final attention layer.
     ### Both are required to compute CDAM score.
     ### We don't need to register hook on MHSA to extract attention weights in case of DINO, because DINO backbone has it already implemented.
-    if MODEL_BCKB in ["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16"]:
+    if MODEL_BCKB in ["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "dinov2_vits14_reg", "dinov2_vitb14_reg"]:
         final_block_norm1 = model.backbone.blocks[-1].norm1
     elif MODEL_BCKB in ["vit_b_16", "vit_l_16"]:
         final_block_norm1 = model.backbone.encoder.layers[-1].ln_1

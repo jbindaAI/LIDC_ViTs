@@ -50,7 +50,7 @@ def plot_res_class(original_img, maps, model_output, save_name: Optional[str] = 
     target_names.append("Attention Map")
     for key in maps[1].keys():
         maps2plot.append(maps[1][key])
-        target_names.append("CDAM score")
+        target_names.append("CDAM"+ "\nMalignant class")
 
     if len(maps2plot) == 2:
         # Binary classification:
