@@ -3,10 +3,8 @@ import torchvision
 import pytorch_lightning as pl
 import torch.nn as nn
 import torch.nn.functional as F
-import torchmetrics
-from functools import partial
+from torchmetrics.regression import MeanSquaredError
 from typing import Literal, Union, Optional
-from ViT3D import VisionTransformer3D
 
 def set_encoder_dropout_p(module, dropout_p):
     if isinstance(module, nn.Dropout):
@@ -34,8 +32,6 @@ class Biomarker_Model(pl.LightningModule):
         self.steps_per_epoch=steps_per_epoch
         self.n_cycles=n_cycles
         self.model_type=model_type
-        self.bootstrap_method=bootstrap_method
-        self.depth=depth
         self.save_hyperparameters()
 
         if model_type in ["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16"]:
@@ -89,7 +85,7 @@ class Biomarker_Model(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        logits_views = torch.zeros((3, y.shape[0], 1), device=self.device)
+        logits_views = torch.zeros((3, y.shape[0], 8), device=self.device)
         for i in range(3):
             logits_views[i] = self(x[i])
         y_hat = torch.mean(logits_views, axis=0).squeeze()

@@ -18,8 +18,7 @@ class LIDC_Dataset(Dataset):
         transform=None,
         label_transform=None,
         mode:Literal["train", "val", "test"]="train",
-        task:Literal["Classification", "Regression"]="Classification",
-        depth:int=1
+        task:Literal["Classification", "Regression"]="Classification"
     ):
         self.task = task
         self.views = ["axial", "coronal", "sagittal"]
@@ -28,7 +27,6 @@ class LIDC_Dataset(Dataset):
         self.datapath = datapath
         self.fold = fold
         self.mode = mode
-        self.depth = depth
 
         df = pd.read_pickle(f"{self.datapath}/ALL_annotations_df.pkl")
         if self.mode == "train":
@@ -76,41 +74,27 @@ class LIDC_Dataset(Dataset):
         # Firstly imgs are 3D volumes:
         img = self.images[nodule_idx]
 
-        if self.depth == 1:
-            # Then, I extract slice of the volume
-            # at the specified view.
-            if view == self.views[0]:
-                img = img[:, :, slice_]
+        # Then, I extract slice of the volume
+        # at the specified view.
+        if view == self.views[0]:
+            img = img[:, :, slice_]
         
-            elif view == self.views[1]:
-                img = img[:, slice_, :]
+        elif view == self.views[1]:
+            img = img[:, slice_, :]
         
-            elif view == self.views[2]:
-                img = img[slice_, :, :]
+        elif view == self.views[2]:
+            img = img[slice_, :, :]
         
-            if (len(img.shape) < 3):
-                # Extracted slices are of shape: (32, 32).
-                # There is need to add third dimmension -> channel.
-                # After that we have (1, 32, 32).
-                img = img.unsqueeze(0)
-         
-            # As ViT model requires 3 color channels,
-            # code below makes 2 more channels by coping original channel.
-            img = img.repeat(3,1,1)
-            
-        elif self.depth > 1:
-            # Then I extract stack of slices around the central slice.
-            k=self.depth//2
-            if view == self.views[0]:
-                img = img[:, :, slice_-k:slice_+k+1]
-                img = torch.movedim(img, 2, 0)
-            elif view == self.views[1]:
-                img = img[:, slice_-k:slice_+k+1, :]
-                img = torch.movedim(img, 1, 0)
-            elif view == self.views[2]:
-                img = img[slice_-k:slice_+k+1, :, :]
+        if (len(img.shape) < 3):
+            # Extracted slices are of shape: (32, 32).
+            # There is need to add third dimmension -> channel.
+            # After that we have (1, 32, 32).
             img = img.unsqueeze(0)
-            
+         
+        # As ViT model requires 3 color channels,
+        # code below makes 2 more channels by coping original channel.
+        img = img.repeat(3,1,1)
+              
         img = torch.clamp(img, -1000, 400) # Values in tensor are clamped in range (-1000, 400)
             
         # If some image transformations are specified:

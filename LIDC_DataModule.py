@@ -12,8 +12,7 @@ class DataModule(pl.LightningDataModule):
                  fold:int=1,
                  batch_size:int=32,
                  num_workers:int=8,
-                 task: Literal['Regression','Classification']="Classification",
-                 depth:int=1 
+                 task: Literal['Regression','Classification']="Classification"
                 ):
         super().__init__()
         self.fold = fold
@@ -21,7 +20,6 @@ class DataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.task = task
-        self.depth = depth
 
     
     def setup(self, stage:str=None):
@@ -29,12 +27,8 @@ class DataModule(pl.LightningDataModule):
         with open(self.datapath+"splitted_sets"+"/"+"fitted_factors.pkl", 'rb') as f:
             norm_factors = pickle.load(f)
         mean, std, scaler = norm_factors[f"fold_{self.fold}"]
-        if self.depth == 1:
-            mean = [mean for _ in range(3)]
-            std = [std for _ in range(3)]
-        else:
-            mean = [mean for _ in range(self.depth)]
-            std = [std for _ in range(self.depth)]
+        mean = [mean for _ in range(3)]
+        std = [std for _ in range(3)]
                      
         train_transform = v2.Compose(
             [
@@ -55,8 +49,7 @@ class DataModule(pl.LightningDataModule):
             transform=train_transform,
             label_transform=scaler,
             mode="train",
-            task=self.task,
-            depth=self.depth
+            task=self.task
         )
             
         self.val_ds = LIDC_Dataset(
@@ -65,8 +58,7 @@ class DataModule(pl.LightningDataModule):
             transform=val_transform,
             label_transform=scaler,
             mode="val",
-            task=self.task,
-            depth=self.depth
+            task=self.task
         )
 
 

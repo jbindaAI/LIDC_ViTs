@@ -12,15 +12,13 @@ from LIDC_DataModule import DataModule
 
 
 ## HYPERPARAMETERS:
-MODEL_NR:int = 1
+MODEL_NR:int = 2
 WANDB_PROJECT:str = "DINO_biom"
-MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16", "3Dvit_8", "3Dvit_16"]="dino_vitb16"
-DEPTH:int = 9
-BOOTSTRAP_METHOD:Literal["centering", "inflation", None] = "inflation"
-EPOCHS:int = 70
+MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16"]="dino_vitb16"
+EPOCHS:int = 50
 BATCH_SIZE:int = 16
 MAX_LR:float = 1e-4
-DIV_FACTOR:int = 10000 # Base LR is computed as MAX_LR/DIV_FACTOR.
+DIV_FACTOR:int = 1000 # Base LR is computed as MAX_LR/DIV_FACTOR.
 N_CYCLES:int = 2
 TRAINABLE_LAYERS:Union[int, Literal["all"]] = "all"
 BCKB_DROPOUT:float = 0.12
@@ -30,7 +28,7 @@ SAVE_TOP_CKPTS:int = 0
 
 if LOCAL:
     datapath="/home/jbinda/INFORM/LIDC_ViTs/dataset/"
-    checkpoints_path="/home/jbinda/INFORM/LIDC_ViTs/ckpt/End2End/"
+    checkpoints_path="/home/jbinda/INFORM/LIDC_ViTs/ckpt/Biomarkers/"
 else:
     datapath=""
     checkpoints_path=""
@@ -58,8 +56,6 @@ for fold in range(1,2): # Iteration over folds
     wandb_logger.experiment.config.update({
         "model_nr": MODEL_NR,
         "model_type": MODEL_TYPE,
-        "depth": DEPTH,
-        "bootstrap_method": BOOTSTRAP_METHOD,
         "epochs": EPOCHS,
         "batch_size": BATCH_SIZE,
         "max_lr": MAX_LR,
@@ -91,8 +87,6 @@ for fold in range(1,2): # Iteration over folds
         steps_per_epoch=steps_per_epoch,
         epochs=EPOCHS,
         n_cycles=N_CYCLES,
-        bootstrap_method=BOOTSTRAP_METHOD,
-        depth=DEPTH
     )
 
     dm = DataModule(
@@ -100,8 +94,7 @@ for fold in range(1,2): # Iteration over folds
         datapath=datapath,
         batch_size=BATCH_SIZE,
         num_workers=8,
-        task="Regression",
-        depth=DEPTH
+        task="Regression"
     )
 
     trainer.fit(model, dm)
