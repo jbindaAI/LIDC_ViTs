@@ -8,6 +8,7 @@ from Biomarker_Model import Biomarker_Model
 from End2End_Model import End2End_Model
 from my_utils.att_cdam_utils import get_maps
 from my_utils.loading_data_utils import load_img
+from my_utils.plot_utils import plot_res_class, plot_CDAM_reg, plot_ori_att_reg
 
 # Globals
 ### Normalizing factors:
@@ -43,7 +44,7 @@ def cdam_pipeline(NODULE: str,
     PATCH_SIZE = patch_sizes[MODEL_BCKB]
 
     # Retrieving model numer:
-    model_numers = {"dino_vits8":39,
+    E2E_model_numers = {"dino_vits8":39,
                    "dino_vitb8":38,
                    "dino_vits16":32,
                    "dino_vitb16":35,
@@ -51,7 +52,18 @@ def cdam_pipeline(NODULE: str,
                     "dinov2_vits14_reg":4,
                     "dinov2_vitb14_reg":1
                    }
-    MODEL_NR = model_numers[MODEL_BCKB]
+    biom_model_numers = {"dino_vits8":20,
+                   "dino_vitb8":22,
+                   "dino_vits16":21,
+                   "dino_vitb16":23,
+                   "vit_b_16":24,
+                    "dinov2_vits14_reg":-1,
+                    "dinov2_vitb14_reg":-1
+                   }
+    if TASK == "Classification":
+        MODEL_NR = E2E_model_numers[MODEL_BCKB]
+    else:
+        MODEL_NR = biom_model_numers[MODEL_BCKB]
     
     # Loading model and registering hooks:
     device = "cuda" if torch.cuda.is_available() else "cpu"    
@@ -150,3 +162,19 @@ def cdam_pipeline(NODULE: str,
     attention_map, CDAM_maps, model_output = get_maps(model, MODEL_BCKB, img, grad, activation, last_selfattn, TASK, patch_size=PATCH_SIZE, scaler=SCALER, clip=True)
 
     return (original_img, attention_map, CDAM_maps, model_output)
+
+
+def call_CDAM(NODULE, SLICE, NODULE_VIEW, TASK, MODEL_BCKB, CKPT_VERSION, FOLD):
+    original_img, attention_map, CDAM_maps, model_output = cdam_pipeline(NODULE=NODULE,
+                  SLICE=SLICE,
+                  NODULE_VIEW=NODULE_VIEW,
+                  TASK=TASK,
+                  MODEL_BCKB=MODEL_BCKB, 
+                  CKPT_VERSION=CKPT_VERSION,
+                  FOLD=FOLD
+                 )
+    if TASK == "Classification":
+        plot_res_class(original_img=original_img, maps=[attention_map, CDAM_maps], model_output=model_output)
+    elif TASK == "Regression":
+        plot_ori_att_reg(original_img, attention_map)
+        plot_CDAM_reg(CDAM_maps, model_output)

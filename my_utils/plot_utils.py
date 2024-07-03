@@ -1,11 +1,18 @@
 # Module containing some useful plotting functions.
 
 import matplotlib.pyplot as plt
+import seaborn as sns
 from typing import Optional
 from my_utils.att_cdam_utils import get_cmap
 import pandas as pd
 import random
 import pickle
+import os
+
+
+# Loading annotations for all dataset
+with open("dataset/ALL_annotations_df.pkl", "rb") as file:
+    ann_df = pickle.load(file)
 
 
 def plot_hists(fold:int, datapath:str, subsets_saving_path:str):
@@ -42,7 +49,7 @@ def plot_hists(fold:int, datapath:str, subsets_saving_path:str):
     return None
 
 
-def plot_res_class(original_img, maps, model_output, save_name: Optional[str] = None):
+def plot_res_class(original_img, maps, model_output, save_name:Optional[str]=None):
     """Using matplotlib, plot the original image and the relevance maps"""
     maps2plot = []
     target_names = []
@@ -57,7 +64,7 @@ def plot_res_class(original_img, maps, model_output, save_name: Optional[str] = 
         plt.figure(figsize=(6, 3))
         num_plots = 3
         plt.subplot(1, num_plots, 1)
-        plt.imshow(original_img, cmap='gray')
+        plt.imshow(original_img[:,:,0], cmap='gray')
         plt.title("Original")
         plt.axis("off")
         for i, m in enumerate(maps2plot):
@@ -84,3 +91,82 @@ def sample_test_example(FOLD:int)->str:
     idx = random.choice(test_examples)
     ID = df.iloc[idx]["path"]
     return ID
+
+
+def plot_CDAM_reg(maps, preds, save_name:Optional[str]=None):
+    """Using matplotlib, plot the original image and the relevance maps"""
+    maps2plot=[]
+    target_names=[]
+    for key in maps.keys():
+        maps2plot.append(maps[key])
+        target_names.append(key)
+
+    # Biomarker Regression:
+    fig, axs = plt.subplots(4, 4, figsize=(10, 10))
+
+    # Plotting CDAM scores:
+    k = 0
+    for i in [0, 2]:
+        for j in range(4):
+            axs[i][j].imshow(maps2plot[k], cmap=get_cmap(maps2plot[k]))
+            axs[i][j].set_title(target_names[k])
+            axs[i][j].tick_params(axis='both', 
+                                  which='both', 
+                                  bottom=False, 
+                                  left=False,
+                                  labelbottom=False,
+                                  labelleft=False
+                                  )
+            k += 1
+    k = 0
+    for i in [1, 3]:
+        for j in range(4):
+            sns.histplot(ann_df,
+                         x=target_names[k].lower(),
+                         kde=True,
+                         bins=14,
+                         stat="percent",
+                         ax=axs[i][j])
+            axs[i][j].axvline(x=preds[target_names[k]],
+                              color='red',
+                              linestyle='--',
+                              linewidth=2,
+                              label=r'$\hat{y}$'
+                              )
+            title = (target_names[k] + "=" + str(preds[target_names[k]]) + " [mm]") if target_names[k] == "Diameter" else target_names[k] + "=" + str(preds[target_names[k]])
+            axs[i][j].set_title(title)
+            axs[i][j].legend()
+            k += 1
+    fig.tight_layout()
+    fig.subplots_adjust(top=0.92)
+    plt.suptitle("CDAM maps for biomarkers")
+    
+    if save_name:
+        if not os.path.exists("relevance_maps"):
+            os.makedirs("relevance_maps")
+            plt.savefig(f"relevance_maps/{save_name}", format="png", transparent=True, bbox_inches='tight')
+    return None
+
+
+def plot_ori_att_reg(original_img, attention_map):
+    fig, axs = plt.subplots(1, 2, figsize=(5, 10))
+    axs[0].imshow(original_img[:,:,0], cmap='gray')
+    axs[0].set_title("Original")
+    axs[0].tick_params(axis='both',
+                       which='both',
+                       bottom=False,
+                       left=False,
+                       labelbottom=False,
+                       labelleft=False
+                      )
+    axs[1].imshow(attention_map, cmap=get_cmap(attention_map))
+    axs[1].set_title("Attention Map")
+    axs[1].tick_params(axis='both',
+                       which='both',
+                       bottom=False,
+                       left=False,
+                       labelbottom=False,
+                       labelleft=False
+                      )
+
+    return None
