@@ -12,18 +12,18 @@ from LIDC_DataModule import DataModule
 
 
 ## HYPERPARAMETERS:
-MODEL_NR:int = 5
+MODEL_NR:int = 21
 WANDB_PROJECT:str = "DINO_biom"
-MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16"]="dino_vitb16"
-EPOCHS:int = 50
-BATCH_SIZE:int = 20
-MAX_LR:float = 1e-4
+MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16"]="dino_vits16"
+EPOCHS:int = 100
+BATCH_SIZE:int = 16
+MAX_LR:float = 3e-5
 DIV_FACTOR:int = 1000 # Base LR is computed as MAX_LR/DIV_FACTOR.
 N_CYCLES:int = 2
 TRAINABLE_LAYERS:Union[int, Literal["all"]] = "all"
 BCKB_DROPOUT:float = 0.12
 LOCAL:bool = False
-SAVE_TOP_CKPTS:int = 0
+SAVE_TOP_CKPTS:int = 3
 
 
 if LOCAL:
@@ -34,7 +34,7 @@ else:
     checkpoints_path="/home/dzban112/LIDC_ViTs/ckpt/Biomarkers/"
 
 
-for fold in range(1,2): # Iteration over folds
+for fold in range(2,3): # Iteration over folds
     # Getting value of training steps:
     with open(datapath+f"splitted_sets/train_fold_{fold}.pkl", "rb") as f:
         n_train_examples = len(pickle.load(f))

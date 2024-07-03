@@ -51,9 +51,7 @@ class Biomarker_Model(pl.LightningModule):
         else:
             raise Exception("Provided model is not handled.")
 
-        self.mlp_head=nn.Sequential(nn.Linear(hidden_size, hidden_size*2),
-                                    nn.ReLU(),
-                                    nn.Linear(hidden_size*2, hidden_size),
+        self.mlp_head=nn.Sequential(nn.Linear(hidden_size, hidden_size),
                                     nn.ReLU(),
                                     nn.Linear(hidden_size, 8)
                                    )
