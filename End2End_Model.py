@@ -6,7 +6,6 @@ import torch.nn.functional as F
 import torchmetrics
 from functools import partial
 from typing import Literal, Union, Optional
-from ViT3D import VisionTransformer3D
 
 def set_encoder_dropout_p(module, dropout_p):
     if isinstance(module, nn.Dropout):
@@ -18,28 +17,24 @@ class End2End_Model(pl.LightningModule):
     def __init__(self,
                  model_type:Literal["dino_vits8", "dino_vitb8", 
                  "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16",
-                 "dinov2_vits14_reg", "dinov2_vitb14_reg", "3Dvit_16"]="dino_vits8",
+                 "dinov2_vits14_reg", "dinov2_vitb14_reg"]="dino_vits8",
                  trainable_layers:Union[int, Literal["all"]]="all", 
                  backbone_dropout:float=0.0,
                  max_lr:float=5e-6,
                  steps_per_epoch:int=30,
                  epochs:int=45,
                  div_factor:int=100,
-                 n_cycles:int=6,
-                 bootstrap_method:Optional[str]=None,
-                 depth:int=5
+                 n_cycles:int=6
                 ):
         
         super().__init__()
         self.epochs=epochs
-        self.backbone_dropout = backbone_dropout
-        self.max_lr = max_lr
-        self.div_factor = div_factor
-        self.steps_per_epoch = steps_per_epoch
-        self.n_cycles = n_cycles
-        self.model_type = model_type
-        self.bootstrap_method = bootstrap_method
-        self.depth = depth
+        self.backbone_dropout=backbone_dropout
+        self.max_lr=max_lr
+        self.div_factor=div_factor
+        self.steps_per_epoch=steps_per_epoch
+        self.n_cycles=n_cycles
+        self.model_type=model_type
         self.save_hyperparameters()
 
         if model_type in ["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16"]:
@@ -60,21 +55,6 @@ class End2End_Model(pl.LightningModule):
             self.backbone.heads = nn.Identity(self.backbone.hidden_dim)
             self.mlp_head=nn.Sequential(nn.Linear(self.backbone.hidden_dim, 1))
 
-        elif model_type == "3Dvit_16":
-            self.backbone = VisionTransformer3D(
-                img_size=(self.depth,224,224),
-                patch_size=(self.depth, 16, 16), # there self.depth refers to image depth
-                embed_dim=768,
-                depth=12, # there depth refers to number of encoders. 
-                in_chans=1,
-                num_heads=12,
-                mlp_ratio=4.0, 
-                qkv_bias=True,
-                norm_layer=partial(nn.LayerNorm, eps=1e-6),
-                model_type="3Dvit_16",
-                bootstrap_method=self.bootstrap_method)
-            self.backbone.init_weights()
-            self.mlp_head=nn.Sequential(nn.Linear(self.backbone.embed_dim, 1))
         else:
             raise Exception("Provided model name is not recognized.")
         
