@@ -445,4 +445,3 @@ class DINOFeaturizer(nn.Module):
             return image_feat, feat[:, 0, :]
 
         return image_feat
-
