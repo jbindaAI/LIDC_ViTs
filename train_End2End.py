@@ -15,9 +15,7 @@ from LIDC_DataModule import DataModule
 MODEL_NR:int = 4
 WANDB_PROJECT:str = "DINOv2_E2E"
 MODEL_TYPE:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", 
-"vit_b_16", "vit_l_16", "dinov2_vits14_reg", "3Dvit_16"]="dinov2_vits14_reg"
-DEPTH:int = 1 # 1 if only slices, more than 1 if training on volumes. 
-BOOTSTRAP_METHOD:Literal["centering", "inflation", None] = None
+"vit_b_16", "vit_l_16", "dinov2_vits14_reg"]="dinov2_vits14_reg"
 EPOCHS:int = 35
 BATCH_SIZE:int = 8
 MAX_LR:float = 3e-5
@@ -59,8 +57,6 @@ for fold in range(1,6): # Iteration over folds
     wandb_logger.experiment.config.update({
         "model_nr": MODEL_NR,
         "model_type": MODEL_TYPE,
-        "depth": DEPTH,
-        "bootstrap_method": BOOTSTRAP_METHOD,
         "epochs": EPOCHS,
         "batch_size": BATCH_SIZE,
         "max_lr": MAX_LR,
@@ -91,9 +87,7 @@ for fold in range(1,6): # Iteration over folds
         div_factor=DIV_FACTOR,
         steps_per_epoch=steps_per_epoch,
         epochs=EPOCHS,
-        n_cycles=N_CYCLES,
-        bootstrap_method=BOOTSTRAP_METHOD,
-        depth=DEPTH
+        n_cycles=N_CYCLES
     )
 
     dm = DataModule(
@@ -101,8 +95,7 @@ for fold in range(1,6): # Iteration over folds
         datapath=datapath,
         batch_size=BATCH_SIZE,
         num_workers=8,
-        task="Classification",
-        depth=DEPTH
+        task="Classification"
     )
 
     trainer.fit(model, dm)

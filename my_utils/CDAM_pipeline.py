@@ -57,8 +57,8 @@ def cdam_pipeline(NODULE: str,
                    "dino_vits16":21,
                    "dino_vitb16":23,
                    "vit_b_16":24,
-                    "dinov2_vits14_reg":-1,
-                    "dinov2_vitb14_reg":-1
+                    "dinov2_vits14_reg":2,
+                    "dinov2_vitb14_reg":4
                    }
     if TASK == "Classification":
         MODEL_NR = E2E_model_numers[MODEL_BCKB]
@@ -176,5 +176,4 @@ def call_CDAM(NODULE, SLICE, NODULE_VIEW, TASK, MODEL_BCKB, CKPT_VERSION, FOLD):
     if TASK == "Classification":
         plot_res_class(original_img=original_img, maps=[attention_map, CDAM_maps], model_output=model_output)
     elif TASK == "Regression":
-        plot_ori_att_reg(original_img, attention_map)
-        plot_CDAM_reg(CDAM_maps, model_output)
+        plot_CDAM_reg(original_img, attention_map, CDAM_maps, model_output)
