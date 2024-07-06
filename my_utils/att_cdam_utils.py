@@ -37,19 +37,19 @@ def get_cmap(heatmap):
 
 # Obtaining maps
 ## Obtaining attention map
-def get_attention_map(model, sample_img, last_selfattn, model_bckb, head=None, return_raw=False):
+def get_attention_map(model, sample_img, last_selfattn, head=None, return_raw=False):
     """This returns the attentions when CLS token is used as query in the last attention layer, averaged over all attention heads"""
-    if model_bckb in ["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16"]:
+    if model.model_type in ["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16"]:
         attentions = model.backbone.get_last_selfattention(sample_img)
         nh = attentions.shape[1]  # number of heads
         attentions = attentions[0, :, 0, 1:].reshape(nh, -1) # Getting attention weights when CLS token is a query.
         
-    elif model_bckb in ["dinov2_vits14_reg", "dinov2_vitb14_reg"]:
+    elif model.model_type in ["dinov2_vits14_reg", "dinov2_vitb14_reg"]:
         attentions = model.backbone.get_last_selfattention(sample_img)
         nh = attentions.shape[1]  # number of heads
         attentions = attentions[0, :, 0, 5:].reshape(nh, -1) # Getting attention weights when CLS token is a query. Avoiding register tokens.
         
-    elif model_bckb in ["vit_b_16", "vit_l_16"]:
+    elif model.model_type in ["vit_b_16", "vit_l_16"]:
         attentions = last_selfattn["last_selfattn"]
         nh = attentions.shape[1]  # number of heads
         attentions = attentions[0, :, 0, 1:].reshape(nh, -1) # Getting attention weights when CLS token is a query.
@@ -72,7 +72,7 @@ def get_attention_map(model, sample_img, last_selfattn, model_bckb, head=None, r
 
 ## Obtaining CDAM map
 def get_CDAM(class_score, model_bckb, activation, grad, clip=False, return_raw=False):
-    """The class_score can either be the activation of a neuron in the prediction vector or a similarity score between the latent representations of a concept and a sample"""
+    """The class_score is the activation of a neuron in the prediction vector"""
     class_score.backward(retain_graph=True)
     if model_bckb in ["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16"]:
         # Token 0 is CLS and others are image patch tokens
@@ -85,7 +85,7 @@ def get_CDAM(class_score, model_bckb, activation, grad, clip=False, return_raw=F
         grads = grad["last_att_in"][0][0, 5:]
 
     attention_scores = torch.tensor(
-        [torch.dot(tokens[i], grads[i]) for i in range(len(tokens))]
+        [torch.dot(tokens[i], grads[i]) for i in range(tokens.shape[0])]
     )
 
     if return_raw:
@@ -115,7 +115,7 @@ class2idx = {"Subtlety":0, "Calcification":1,
 
 
 ## Wrapper to obtain both Attention map and CDAM map.
-def get_maps(model, model_bckb, img, grad, activation, last_selfattn, task, patch_size, scaler, return_raw=False, clip=False):
+def get_maps(model, img, grad, activation, last_selfattn, task, patch_size, scaler, return_raw=False, clip=False):
     """
     Wrapper function to get the attention map and the concept map for a given image and target class.
     In the case of LIDC dataset, target class is a malignant nodule or biomarkers.
@@ -125,13 +125,13 @@ def get_maps(model, model_bckb, img, grad, activation, last_selfattn, task, patc
     PATCH_SIZE=patch_size
 
     pred = model(img)
-    attention_map = get_attention_map(model, img, last_selfattn, model_bckb=model_bckb, return_raw=return_raw)
+    attention_map = get_attention_map(model, img, last_selfattn, return_raw=return_raw)
 
     CDAM_maps = {}
     if task == "Classification":
         class_attention_map = get_CDAM(
             class_score=pred[0][0],
-            model_bckb=model_bckb,
+            model_bckb=model.model_type,
             activation=activation,
             grad=grad,
             return_raw=return_raw,
@@ -142,10 +142,11 @@ def get_maps(model, model_bckb, img, grad, activation, last_selfattn, task, patc
     else:
         pred_biom = {}
         rescaled_preds = scaler.inverse_transform(pred.cpu().detach().numpy())
+        print(rescaled_preds)
         for key in class2idx.keys():
             class_attention_map = get_CDAM(
                 class_score=pred[0][class2idx[key]],
-                model_bckb=model_bckb,
+                model_bckb=model.model_type,
                 activation=activation,
                 grad=grad,
                 return_raw=return_raw,

@@ -159,7 +159,7 @@ def cdam_pipeline(NODULE: str,
 
     # Model inference:
     model = model.to(device)
-    attention_map, CDAM_maps, model_output = get_maps(model, MODEL_BCKB, img, grad, activation, last_selfattn, TASK, patch_size=PATCH_SIZE, scaler=SCALER, clip=True)
+    attention_map, CDAM_maps, model_output = get_maps(model, img, grad, activation, last_selfattn, TASK, patch_size=PATCH_SIZE, scaler=SCALER, clip=True)
 
     return (original_img, attention_map, CDAM_maps, model_output)
 
