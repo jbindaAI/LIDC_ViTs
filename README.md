@@ -10,7 +10,7 @@ This repository contains code needed to reproduce results of `Explaining the Vis
 
 
 ### Prerequisites:
-1. Clone repository and move into project directory:
+1. Clone repository and move into the project directory:
 ```bash
 git clone https://github.com/jbindaAI/LIDC_ViTs.git
 cd LIDC_ViTs
@@ -25,9 +25,9 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 4. Download LIDC-IDRI dataset and preprocess it: </br>
-Dataset is available there: [LIDC-IDRI](https://www.cancerimagingarchive.net/collection/lidc-idri/). To download it, follow publisher instructions. </br>
+Dataset is available there: [LIDC-IDRI](https://www.cancerimagingarchive.net/collection/lidc-idri/). To download it, follow a publisher instructions. </br>
 Data preprocessing should be done as in a paper: [Integration of Radiomics and Tumor Biomarkers in Interpretable Machine Learning Models](https://doi.org/10.3390/cancers15092459). </br>
-I preprocessed data in batches with `dataset_creation.py` script.
+I preprocessed data in batches with `dataset_creation.py` script. Data after preprocessing, should be placed in `dataset` directory.
 
 5. Create empty directory and download into it pretrained DINOv2 backbones:
 ```bash

@@ -142,7 +142,6 @@ def get_maps(model, img, grad, activation, last_selfattn, task, patch_size, scal
     else:
         pred_biom = {}
         rescaled_preds = scaler.inverse_transform(pred.cpu().detach().numpy())
-        print(rescaled_preds)
         for key in class2idx.keys():
             class_attention_map = get_CDAM(
                 class_score=pred[0][class2idx[key]],
