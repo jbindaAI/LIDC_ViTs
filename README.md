@@ -29,7 +29,7 @@ Dataset is available there: [LIDC-IDRI](https://www.cancerimagingarchive.net/col
 Data preprocessing should be done as in a paper: [Integration of Radiomics and Tumor Biomarkers in Interpretable Machine Learning Models](https://doi.org/10.3390/cancers15092459). </br>
 I preprocessed data in batches with `dataset_creation.py` script.
 
-5. Create empty directory and download into it pretrained DINOv2 backbones: </br>
+5. Create empty directory and download into it pretrained DINOv2 backbones:
 ```bash
 mkdir pretrained
 cd pretrained
@@ -49,7 +49,6 @@ gdown https://drive.google.com/uc\?id\=1zWsmqwdAMKKcz3hvbc4CFXh6MRIM7Yw9
    
 9. Download already fine-tuned checkpoints: [OPTIONAL] </br>
 Version 0 of checkpoints trained on the first fold are available below: </br>
-
 Rest of checkpoints are available on a request. 
 
 ## Author
