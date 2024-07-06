@@ -59,21 +59,39 @@ def plot_res_class(original_img, maps, model_output, save_name:Optional[str]=Non
         maps2plot.append(maps[1][key])
         target_names.append("CDAM"+ "\nMalignant class")
 
-    if len(maps2plot) == 2:
-        # Binary classification:
-        plt.figure(figsize=(6, 3))
-        num_plots = 3
-        plt.subplot(1, num_plots, 1)
-        plt.imshow(original_img[:,:,0], cmap='gray')
-        plt.title("Original")
-        plt.axis("off")
-        for i, m in enumerate(maps2plot):
-            plt.subplot(1, num_plots, i + 2)
-            plt.imshow(m, cmap=get_cmap(m))  
-            plt.title(target_names[i])
-            plt.axis("off")
-        plt.suptitle(f"Probability of malignant class: {round(model_output, 2)}")
-        plt.subplots_adjust(wspace=0.0, hspace=0)
+    fig, axs = plt.subplots(1, 3, figsize=(9, 4), layout='constrained')
+    ## Original:
+    axs[0].imshow(original_img[:,:,0], cmap='gray')
+    axs[0].set_title("Original")
+    axs[0].tick_params(axis='both', 
+                       which='both', 
+                       bottom=False, 
+                       left=False,
+                       labelbottom=False,
+                       labelleft=False
+                      )
+    ## Attention map:
+    axs[1].imshow(maps2plot[0], cmap=get_cmap(maps2plot[0]))
+    axs[1].set_title(target_names[0])
+    axs[1].tick_params(axis='both', 
+                       which='both', 
+                       bottom=False, 
+                       left=False,
+                       labelbottom=False,
+                       labelleft=False
+                      )
+    ## CDAM Map:
+    cdam = axs[2].imshow(maps2plot[1], cmap=get_cmap(maps2plot[1]))
+    axs[2].set_title(target_names[1])
+    axs[2].tick_params(axis='both', 
+                       which='both', 
+                       bottom=False, 
+                       left=False,
+                       labelbottom=False,
+                       labelleft=False
+                      )
+    fig.colorbar(cdam, ax=axs[2], shrink=0.6)
+    plt.suptitle(f"Probability of malignant class: {round(model_output, 2)}")
 
     if save_name:
         import os
@@ -93,58 +111,76 @@ def sample_test_example(FOLD:int)->str:
     return ID
 
 
-def plot_CDAM_reg(maps, preds, save_name:Optional[str]=None):
+def plot_CDAM_reg(original_img, attention_map, cdam_maps, preds, save_name:Optional[str]=None):
     """Using matplotlib, plot the original image and the relevance maps"""
     maps2plot=[]
     target_names=[]
-    for key in maps.keys():
-        maps2plot.append(maps[key])
+    for key in cdam_maps.keys():
+        maps2plot.append(cdam_maps[key])
         target_names.append(key)
 
-    # Biomarker Regression:
-    fig, axs = plt.subplots(4, 4, figsize=(10, 10))
+    for map_, title in zip(maps2plot, target_names):
+        # Biomarker Regression:
+        fig, axs = plt.subplots(1, 4, figsize=(12, 4), layout='constrained')
 
-    # Plotting CDAM scores:
-    k = 0
-    for i in [0, 2]:
-        for j in range(4):
-            axs[i][j].imshow(maps2plot[k], cmap=get_cmap(maps2plot[k]))
-            axs[i][j].set_title(target_names[k])
-            axs[i][j].tick_params(axis='both', 
-                                  which='both', 
-                                  bottom=False, 
-                                  left=False,
-                                  labelbottom=False,
-                                  labelleft=False
-                                  )
-            k += 1
-    k = 0
-    for i in [1, 3]:
-        for j in range(4):
-            sns.histplot(ann_df,
-                         x=target_names[k].lower(),
-                         kde=True,
-                         bins=14,
-                         stat="percent",
-                         ax=axs[i][j])
-            axs[i][j].axvline(x=preds[target_names[k]],
-                              color='red',
-                              linestyle='--',
-                              linewidth=2,
-                              label=r'$\hat{y}$'
-                              )
-            title = (target_names[k] + "=" + str(preds[target_names[k]]) + " [mm]") if target_names[k] == "Diameter" else target_names[k] + "=" + str(preds[target_names[k]])
-            axs[i][j].set_title(title)
-            axs[i][j].legend()
-            k += 1
-    fig.tight_layout()
-    fig.subplots_adjust(top=0.92)
-    plt.suptitle("CDAM maps for biomarkers")
+        ## Original img:
+        axs[0].imshow(original_img[:,:,0], cmap='gray')
+        axs[0].set_title("Original")
+        axs[0].tick_params(axis='both', 
+                           which='both', 
+                           bottom=False, 
+                           left=False,
+                           labelbottom=False,
+                           labelleft=False
+                          )
+        
+        ## Attention map:
+        axs[1].imshow(attention_map, cmap=get_cmap(attention_map))
+        axs[1].set_title("Attention Map")
+        axs[1].tick_params(axis='both', 
+                           which='both', 
+                           bottom=False, 
+                           left=False,
+                           labelbottom=False,
+                           labelleft=False
+                          )
+                      
+        ## CDAM Map:
+        cdam = axs[2].imshow(map_, cmap=get_cmap(map_))
+        axs[2].set_title(title)
+        axs[2].tick_params(axis='both', 
+                           which='both', 
+                           bottom=False, 
+                           left=False,
+                           labelbottom=False,
+                           labelleft=False
+                          )
+        fig.colorbar(cdam, ax=axs[2], shrink=0.6)
+
+        ## Histogram
+        sns.histplot(ann_df,
+                     x=title.lower(),
+                     kde=True,
+                     bins=14,
+                     stat="percent",
+                     ax=axs[3])
+        axs[3].axvline(x=preds[title],
+                          color='red',
+                          linestyle='--',
+                          linewidth=2,
+                          label=r'$\hat{y}$'
+                         )
+        title = (title + "=" + str(preds[title]) + " [mm]") if title == "Diameter" else title + "=" + str(preds[title])
+        axs[3].set_title(title)
+        axs[3].legend()
+        
+        plt.suptitle("CDAM maps for biomarkers")
+        plt.show()
     
-    if save_name:
-        if not os.path.exists("relevance_maps"):
-            os.makedirs("relevance_maps")
-            plt.savefig(f"relevance_maps/{save_name}", format="png", transparent=True, bbox_inches='tight')
+        if save_name:
+            if not os.path.exists("relevance_maps"):
+                os.makedirs("relevance_maps")
+            plt.savefig(f"relevance_maps/{save_name}""_"+title, format="png", transparent=True, bbox_inches='tight')
     return None
 
 

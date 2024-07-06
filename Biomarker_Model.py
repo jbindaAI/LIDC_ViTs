@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchmetrics.regression import MeanSquaredError
 from typing import Literal, Union, Optional
+from dinov2.hub.backbones import dinov2_vits14_reg, dinov2_vitb14_reg
 
 def set_encoder_dropout_p(module, dropout_p):
     if isinstance(module, nn.Dropout):
@@ -14,7 +15,9 @@ def set_encoder_dropout_p(module, dropout_p):
 
 class Biomarker_Model(pl.LightningModule):
     def __init__(self,
-                 model_type:Literal["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16"]="dino_vits8",
+                 model_type:Literal["dino_vits8", "dino_vitb8", 
+                 "dino_vits16", "dino_vitb16", "vit_b_16", "vit_l_16",
+                 "dinov2_vits14_reg", "dinov2_vitb14_reg"]="dino_vits8",
                  trainable_layers:Union[int, Literal["all"]]="all", 
                  backbone_dropout:float=0.0,
                  max_lr:float=5e-6,
@@ -37,17 +40,29 @@ class Biomarker_Model(pl.LightningModule):
         if model_type in ["dino_vits8", "dino_vitb8", "dino_vits16", "dino_vitb16"]:
             self.backbone = torch.hub.load("facebookresearch/dino:main", model_type)
             hidden_size=self.backbone.embed_dim
-        elif model_type in ['dinov2_vits14', 'dinov2_vitb14', 'dinov2_vitl14']:
-            self.backbone=torch.hub.load('facebookresearch/dinov2', model_type)
-            hidden_size=self.backbone.embed_dim
+            
+        elif model_type == 'dinov2_vits14_reg':
+            self.backbone = dinov2_vits14_reg()
+            state_dict = torch.load("pretrained/dinov2_vits14_reg4_pretrain.pth")
+            self.backbone.load_state_dict(state_dict)
+            hidden_size = self.backbone.embed_dim
+
+        elif model_type == 'dinov2_vitb14_reg':
+            self.backbone = dinov2_vitb14_reg()
+            state_dict = torch.load("pretrained/dinov2_vitb14_reg4_pretrain.pth")
+            self.backbone.load_state_dict(state_dict)
+            hidden_size = self.backbone.embed_dim
+            
         elif model_type=="vit_b_16":
             self.backbone=torchvision.models.vit_b_16(weights='IMAGENET1K_V1')
             self.backbone.heads=nn.Identity(self.backbone.hidden_dim)
             hidden_size=self.backbone.hidden_dim
+            
         elif model_type=="vit_l_16":
             self.backbone=torchvision.models.vit_l_16(weights='IMAGENET1K_V1')
             self.backbone.heads=nn.Identity(self.backbone.hidden_dim)
             hidden_size=self.backbone.hidden_dim 
+            
         else:
             raise Exception("Provided model is not handled.")
 

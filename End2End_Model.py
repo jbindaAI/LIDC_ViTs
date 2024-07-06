@@ -6,6 +6,7 @@ import torch.nn.functional as F
 import torchmetrics
 from functools import partial
 from typing import Literal, Union, Optional
+from dinov2.hub.backbones import dinov2_vits14_reg, dinov2_vitb14_reg
 
 def set_encoder_dropout_p(module, dropout_p):
     if isinstance(module, nn.Dropout):
@@ -41,8 +42,16 @@ class End2End_Model(pl.LightningModule):
             self.backbone = torch.hub.load("facebookresearch/dino:main", model_type)
             self.mlp_head=nn.Sequential(nn.Linear(self.backbone.embed_dim, 1))
 
-        elif model_type in ['dinov2_vits14_reg', 'dinov2_vitb14_reg']:
-            self.backbone = torch.hub.load('facebookresearch/dinov2', model_type)
+        elif model_type == 'dinov2_vits14_reg':
+            self.backbone = dinov2_vits14_reg()
+            state_dict = torch.load("pretrained/dinov2_vits14_reg4_pretrain.pth")
+            self.backbone.load_state_dict(state_dict)
+            self.mlp_head=nn.Sequential(nn.Linear(self.backbone.embed_dim, 1))
+
+        elif model_type == 'dinov2_vitb14_reg':
+            self.backbone = dinov2_vitb14_reg()
+            state_dict = torch.load("pretrained/dinov2_vitb14_reg4_pretrain.pth")
+            self.backbone.load_state_dict(state_dict)
             self.mlp_head=nn.Sequential(nn.Linear(self.backbone.embed_dim, 1))
             
         elif model_type == "vit_b_16":
