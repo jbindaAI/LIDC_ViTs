@@ -6,7 +6,7 @@
 
 
 ## Overview
-This repository contains code needed to reproduce results of `Explaining the Vision Transformers for Medical Images using Class-Discriminative Attention Maps (CDAM)` project. This project aims to apply in medical imaging domain Class-Discriminative Attention Maps (CDAM). CDAM code is mostly based on the implementation developed by Brocki and Chung, 2023 ([arxiv](https://doi.org/10.48550/arXiv.2312.02364)).
+This repository contains code needed to reproduce results of `Explaining the Vision Transformers for Medical Images using Class-Discriminative Attention Maps (CDAM)` project. This project aims to apply in medical imaging domain Class-Discriminative Attention Maps (CDAM). CDAM code is mostly based on the implementation developed by Brocki and Chung, 2023 ([arxiv](https://doi.org/10.48550/arXiv.2312.02364)). Official CDAM repository is there: [CDAM](https://github.com/lenbrocki/CDAM.git).
 
 
 ### Prerequisites:
