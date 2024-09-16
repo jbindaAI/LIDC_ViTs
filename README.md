@@ -48,7 +48,12 @@ gdown https://drive.google.com/uc\?id\=1zWsmqwdAMKKcz3hvbc4CFXh6MRIM7Yw9
 ```
    
 9. **Download already fine-tuned checkpoints:** [OPTIONAL] </br>
-Version 0 of checkpoints trained on the first fold are available below: </br>
+Examplary checkpoints of DINO ViTb8 trained on the first fold are available below: </br>
+Download: [Google Disc](https://drive.google.com/drive/folders/1Rg57XsVA5Dalhev61F7B0JpRiMMqGqRP) </br>
+```python
+import gdown
+gdown.download_folder("https://drive.google.com/drive/folders/1Rg57XsVA5Dalhev61F7B0JpRiMMqGqRP")
+```
 Rest of checkpoints are available on a request. 
 
 ## Author
