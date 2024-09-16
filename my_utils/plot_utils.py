@@ -57,7 +57,7 @@ def plot_res_class(original_img, maps, model_output, save_name:Optional[str]=Non
     target_names.append("Attention Map")
     for key in maps[1].keys():
         maps2plot.append(maps[1][key])
-        target_names.append("CDAM"+ "\nMalignant class")
+        target_names.append("CDAM"+ "|Malignant")
 
     fig, axs = plt.subplots(1, 3, figsize=(9, 4), layout='constrained')
     ## Original:
@@ -90,8 +90,8 @@ def plot_res_class(original_img, maps, model_output, save_name:Optional[str]=Non
                        labelbottom=False,
                        labelleft=False
                       )
-    fig.colorbar(cdam, ax=axs[2], shrink=0.6)
-    plt.suptitle(f"Probability of malignant class: {round(model_output, 2)}")
+    #fig.colorbar(cdam, ax=axs[2], shrink=0.6)
+    #plt.suptitle(f"Probability of malignant class: {round(model_output, 2)}")
 
     if save_name:
         import os
@@ -181,6 +181,132 @@ def plot_CDAM_reg(original_img, attention_map, cdam_maps, preds, save_name:Optio
             if not os.path.exists("relevance_maps"):
                 os.makedirs("relevance_maps")
             plt.savefig(f"relevance_maps/{save_name}""_"+title, format="png", transparent=True, bbox_inches='tight')
+    return None
+
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.colors as clr
+
+mycmap = clr.LinearSegmentedColormap.from_list(
+    "Random gradient 1030",
+    (
+        (0.000, (0.000, 0.890, 1.000)),
+        (0.370, (0.263, 0.443, 0.671)),
+        (0.500, (0.000, 0.000, 0.000)),
+        (0.630, (0.545, 0.353, 0.267)),
+        (1.000, (1.000, 0.651, 0.000)),
+    ),
+)
+
+def plot_CDAM_reg2(original_img, attention_map, cdam_maps, preds, save_name: Optional[str] = None):
+    """Using matplotlib, plot the original image and the relevance maps for different classes in a grid with two rows and up to five plots per row."""
+    
+    maps2plot = []
+    target_names = []
+    for key in cdam_maps.keys():
+        maps2plot.append(cdam_maps[key])
+        target_names.append(key)
+
+    # Determine the global min and max values across all maps for consistent color scale
+    all_values = np.concatenate([m.flatten() for m in maps2plot])
+    vmin, vmax = all_values.min(), all_values.max()
+
+    total_maps = len(maps2plot) + 2  
+    rows = (total_maps + 4) // 5 
+    fig, axs = plt.subplots(rows, 5, figsize=(20, 4 * rows)) 
+
+    # Flatten the axs array for easy indexing if there are multiple rows
+    axs = axs.flatten()
+
+    # Plot the original image
+    axs[0].imshow(original_img[:, :, 0], cmap='gray')
+    axs[0].set_title("Original")
+    axs[0].axis("off")
+
+    # Plot the attention map
+    axs[1].imshow(attention_map, cmap=get_cmap(attention_map))
+    axs[1].set_title("Attention Map")
+    axs[1].axis("off")
+
+    # Plot each CDAM map
+    for i, (map_, title) in enumerate(zip(maps2plot, target_names), start=2):
+        axs[i].imshow(map_, cmap=get_cmap(map_))
+        axs[i].set_title("CDAM|"+title)
+        axs[i].axis("off")
+
+    # Turn off any remaining empty subplots
+    for j in range(total_maps, len(axs)):
+        axs[j].axis("off")
+
+    #plt.suptitle("CDAM Maps for Biomarkers")
+    plt.subplots_adjust(wspace=0.005, hspace=0.2)  # Adjust spacing between plots
+
+    if save_name:
+        if not os.path.exists("relevance_maps"):
+            os.makedirs("relevance_maps")
+        plt.savefig(f"relevance_maps/{save_name}.png", format="png", transparent=True, bbox_inches='tight')
+
+    plt.show()
+
+    return None
+
+
+def plot_CDAM_reg3(original_img, attention_map, cdam_maps, preds, save_name: Optional[str] = None):
+    """Using matplotlib, plot the original image and the relevance maps for different classes in a grid with two rows and up to five plots per row."""
+    
+    # Collect all the CDAM maps and corresponding titles
+    maps2plot = []
+    target_names = []
+    for key in cdam_maps.keys():
+        maps2plot.append(cdam_maps[key])
+        target_names.append(key)
+    
+    # Determine the global min and max values across all maps for consistent color scale
+    all_values = np.concatenate([m.flatten() for m in maps2plot])
+    vmin, vmax = all_values.min(), all_values.max()
+
+    total_maps = len(maps2plot) + 2 
+    rows = (total_maps + 4) // 5
+    fig, axs = plt.subplots(rows, 5, figsize=(20, 4 * rows))
+
+    # Flatten the axs array for easy indexing if there are multiple rows
+    axs = axs.flatten()
+
+    # Plot the original image
+    axs[0].imshow(original_img[:, :, 0], cmap='gray')
+    axs[0].set_title("Original")
+    axs[0].axis("off")
+
+    # Plot the attention map
+    axs[1].imshow(attention_map, cmap=mycmap, vmin=vmin, vmax=vmax)
+    axs[1].set_title("Attention Map")
+    axs[1].axis("off")
+
+    # Plot each CDAM map
+    for i, (map_, title) in enumerate(zip(maps2plot, target_names), start=2):
+        axs[i].imshow(map_, cmap=mycmap, vmin=vmin, vmax=vmax)
+        axs[i].set_title(title)
+        axs[i].axis("off")
+
+    # Turn off any remaining empty subplots
+    for j in range(total_maps, len(axs)):
+        axs[j].axis("off")
+
+    plt.suptitle("CDAM Maps for Biomarkers")
+    plt.subplots_adjust(wspace=0.005, hspace=0.2) 
+
+    if save_name:
+        if not os.path.exists("relevance_maps"):
+            os.makedirs("relevance_maps")
+        plt.savefig(f"relevance_maps/{save_name}.png", format="png", transparent=True, bbox_inches='tight')
+
+    plt.show()
+
     return None
 
 

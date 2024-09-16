@@ -95,8 +95,8 @@ def get_CDAM(class_score, model_bckb, activation, grad, clip=False, return_raw=F
         if clip:
             attention_scores = torch.clamp(
                 attention_scores,
-                min=torch.quantile(attention_scores, 0.001),
-                max=torch.quantile(attention_scores, 0.999),
+                min=torch.quantile(attention_scores, 0.01),
+                max=torch.quantile(attention_scores, 0.99),
             )
         w = int(np.sqrt(attention_scores.squeeze().shape[0]))
         attention_scores = attention_scores.reshape(w, w)
@@ -129,6 +129,7 @@ def get_maps(model, img, grad, activation, last_selfattn, task, patch_size, scal
 
     CDAM_maps = {}
     if task == "Classification":
+        model.zero_grad()
         class_attention_map = get_CDAM(
             class_score=pred[0][0],
             model_bckb=model.model_type,
@@ -143,6 +144,7 @@ def get_maps(model, img, grad, activation, last_selfattn, task, patch_size, scal
         pred_biom = {}
         rescaled_preds = scaler.inverse_transform(pred.cpu().detach().numpy())
         for key in class2idx.keys():
+            model.zero_grad()
             class_attention_map = get_CDAM(
                 class_score=pred[0][class2idx[key]],
                 model_bckb=model.model_type,

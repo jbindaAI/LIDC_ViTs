@@ -8,7 +8,7 @@ from Biomarker_Model import Biomarker_Model
 from End2End_Model import End2End_Model
 from my_utils.att_cdam_utils import get_maps
 from my_utils.loading_data_utils import load_img
-from my_utils.plot_utils import plot_res_class, plot_CDAM_reg, plot_ori_att_reg
+from my_utils.plot_utils import plot_res_class, plot_CDAM_reg3, plot_CDAM_reg2, plot_ori_att_reg
 
 # Globals
 ### Normalizing factors:
@@ -174,6 +174,9 @@ def call_CDAM(NODULE, SLICE, NODULE_VIEW, TASK, MODEL_BCKB, CKPT_VERSION, FOLD):
                   FOLD=FOLD
                  )
     if TASK == "Classification":
-        plot_res_class(original_img=original_img, maps=[attention_map, CDAM_maps], model_output=model_output)
+        plot_res_class(original_img=original_img, maps=[attention_map, CDAM_maps], model_output=model_output, save_name=f"{NODULE.split('.')[0]}.png")
+        return original_img, CDAM_maps["End2End"]
     elif TASK == "Regression":
-        plot_CDAM_reg(original_img, attention_map, CDAM_maps, model_output)
+        #plot_CDAM_reg(original_img, attention_map, CDAM_maps, model_output)
+        plot_CDAM_reg2(original_img, attention_map, CDAM_maps, model_output, save_name=f"reg_{NODULE.split('.')[0]}")
+        #plot_CDAM_reg3(original_img, attention_map, CDAM_maps, model_output)

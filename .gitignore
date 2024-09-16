@@ -6,3 +6,5 @@ dataset/
 pretrained/
 wsad.slurm
 trash.ipynb
+CDAM_LIDC_backup.ipynb
+relevance_maps/
